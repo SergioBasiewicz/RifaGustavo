@@ -73,7 +73,7 @@
     /* Ajustes para telas pequenas (celulares) */
     @media (max-width: 600px) {
       .grid {
-        grid-template-columns: repeat(5, 50px); /* Menos colunas */
+        grid-template-columns: repeat(5, 50px);
         gap: 5px;
       }
 
@@ -89,10 +89,9 @@
       }
     }
 
-    /* Ajustes para telas muito pequenas (ex: celulares pequenos) */
     @media (max-width: 400px) {
       .grid {
-        grid-template-columns: repeat(4, 50px); /* Mais colunas no celular muito pequeno */
+        grid-template-columns: repeat(4, 50px);
       }
 
       .number {
@@ -121,64 +120,55 @@
 <button id="enviarBtn">Enviar para WhatsApp</button>
 
 <script>
+// CONFIGURAÇÕES FÁCEIS AQUI 🔥
+
 // Número do WhatsApp
-const seuNumeroWhatsapp = '5541984203644'; // <-- Coloque seu número aqui!
+const seuNumeroWhatsapp = '5541984203644';
 
-// Reservas iniciais (dados podem ser modificados dinamicamente, como exemplo)
-const reservas = {
-    5: "João",
-    12: "Maria",
-    32: "Carlos",
-    100: "Carlos"
-};
+// Lista dos números reservados
+const numerosReservados = [5, 12, 32, 47, 88, 55, 24, 21]; // <-- Só adicionar aqui!
 
+// Funções
 let numeroSelecionado = null;
-
-// Referência para a grade de números
 const grid = document.getElementById('grid');
 
-// Função para carregar os números na tela
-function carregarNomes() {
-    for (let i = 1; i <= 100; i++) {
-        const div = document.createElement('div');
-        div.className = 'number';
-        div.innerText = i;
+function carregarNumeros() {
+  grid.innerHTML = ''; // Limpa antes de recriar
 
-        if (reservas[i]) {
-            div.classList.add('reserved');
-            div.innerText = i + "\n🚫";
-            div.title = "Reservado por " + reservas[i];
-        } else {
-            div.addEventListener('click', function() {
-                // Se o número já foi selecionado, ele é automaticamente marcado como reservado
-                if (!reservas[i]) {
-                    div.classList.add('reserved');
-                    div.classList.remove('selected');
-                    reservas[i] = "Reservado"; // Marca o número como reservado
-                    numeroSelecionado = i;
-                } else {
-                    alert('Este número já está reservado!');
-                }
-            });
-        }
+  for (let i = 1; i <= 100; i++) {
+    const div = document.createElement('div');
+    div.className = 'number';
+    div.innerText = i;
 
-        grid.appendChild(div);
+    if (numerosReservados.includes(i)) {
+      div.classList.add('reserved');
+      div.innerText = i + "\n🚫";
+      div.title = "Reservado";
+    } else {
+      div.addEventListener('click', function() {
+        const anterior = document.querySelector('.selected');
+        if (anterior) anterior.classList.remove('selected');
+        div.classList.add('selected');
+        numeroSelecionado = i;
+      });
     }
+
+    grid.appendChild(div);
+  }
 }
 
-// Chama a função para carregar os números
-carregarNomes();
+carregarNumeros();
 
-// Ação ao clicar no botão para enviar o número via WhatsApp
+// Clique para enviar pelo WhatsApp
 document.getElementById('enviarBtn').addEventListener('click', function() {
-    if (!numeroSelecionado) {
-        alert('Por favor, selecione um número primeiro!');
-        return;
-    }
+  if (!numeroSelecionado) {
+    alert('Por favor, selecione um número primeiro!');
+    return;
+  }
 
-    const mensagem = `Olá! Gostaria de reservar o número ${numeroSelecionado} para o Chá Rifa do Gustavo.`;
-    const url = `https://wa.me/${seuNumeroWhatsapp}?text=${encodeURIComponent(mensagem)}`;
-    window.open(url, '_blank');
+  const mensagem = `Olá! Gostaria de reservar o número ${numeroSelecionado} para o Chá Rifa do Gustavo.`;
+  const url = `https://wa.me/${seuNumeroWhatsapp}?text=${encodeURIComponent(mensagem)}`;
+  window.open(url, '_blank');
 });
 </script>
 
