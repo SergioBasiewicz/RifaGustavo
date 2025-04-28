@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chá Rifa do Gustavo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 1.5em;
+    }
+
+    p {
+      font-size: 1.2em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 50px);
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .number {
+      width: 50px;
+      height: 50px;
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: background-color 0.3s;
+    }
+
+    .number:hover {
+      background-color: #45a049;
+    }
+
+    .reserved {
+      background-color: #d9534f;
+      cursor: not-allowed;
+    }
+
+    .selected {
+      background-color: #f0ad4e !important;
+    }
+
+    #enviarBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #enviarBtn:hover {
+      background-color: #45a049;
+    }
+
+    /* Ajustes para telas pequenas (celulares) */
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(5, 50px); /* Menos colunas */
+        gap: 5px;
+      }
+
+      .number {
+        width: 40px;
+        height: 40px;
+        font-size: 0.9em;
+      }
+
+      #enviarBtn {
+        font-size: 16px;
+        padding: 8px 16px;
+      }
+    }
+
+    /* Ajustes para telas muito pequenas (ex: celulares pequenos) */
+    @media (max-width: 400px) {
+      .grid {
+        grid-template-columns: repeat(4, 50px); /* Mais colunas no celular muito pequeno */
+      }
+
+      .number {
+        width: 35px;
+        height: 35px;
+        font-size: 0.8em;
+      }
+
+      h1 {
+        font-size: 1.2em;
+      }
+
+      p {
+        font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Chá Rifa do Gustavo</h1>
+<p>Escolha seu número e clique em "Enviar"</p>
+
+<div class="grid" id="grid"></div>
+
+<button id="enviarBtn">Enviar para WhatsApp</button>
+
+<script>
+// Número do WhatsApp
+const seuNumeroWhatsapp = '5511999999999'; // <-- Coloque seu número aqui!
+
+// Reservas iniciais (dados podem ser modificados dinamicamente, como exemplo)
+const reservas = {
+    5: "João",
+    12: "Maria",
+    32: "Carlos"
+};
+
+let numeroSelecionado = null;
+
+// Referência para a grade de números
+const grid = document.getElementById('grid');
+
+// Função para carregar os números na tela
+function carregarNomes() {
+    for (let i = 1; i <= 100; i++) {
+        const div = document.createElement('div');
+        div.className = 'number';
+        div.innerText = i;
+
+        if (reservas[i]) {
+            div.classList.add('reserved');
+            div.innerText = i + "\n🚫";
+            div.title = "Reservado por " + reservas[i];
+        } else {
+            div.addEventListener('click', function() {
+                // Se o número já foi selecionado, ele é automaticamente marcado como reservado
+                if (!reservas[i]) {
+                    div.classList.add('reserved');
+                    div.classList.remove('selected');
+                    reservas[i] = "Reservado"; // Marca o número como reservado
+                    numeroSelecionado = i;
+                } else {
+                    alert('Este número já está reservado!');
+                }
+            });
+        }
+
+        grid.appendChild(div);
+    }
+}
+
+// Chama a função para carregar os números
+carregarNomes();
+
+// Ação ao clicar no botão para enviar o número via WhatsApp
+document.getElementById('enviarBtn').addEventListener('click', function() {
+    if (!numeroSelecionado) {
+        alert('Por favor, selecione um número primeiro!');
+        return;
+    }
+
+    const mensagem = `Olá! Gostaria de reservar o número ${numeroSelecionado} para o Chá Rifa do Gustavo.`;
+    const url = `https://wa.me/${seuNumeroWhatsapp}?text=${encodeURIComponent(mensagem)}`;
+    window.open(url, '_blank');
+});
+</script>
+
+</body>
+</html>
