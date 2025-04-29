@@ -129,29 +129,33 @@
   }
 
   document.getElementById('enviarBtn').addEventListener('click', async function() {
-    if (!numeroSelecionado) {
-      alert('Por favor, selecione um número primeiro!');
-      return;
-    }
+  if (!numeroSelecionado) {
+    alert('Por favor, selecione um número primeiro!');
+    return;
+  }
 
-    // Pedir o nome do usuário antes de enviar a reserva
-    const nome = prompt("Por favor, digite seu nome:");
+  // Pedir o nome do usuário antes de enviar a reserva
+  const nome = prompt("Por favor, digite seu nome:");
 
-    if (!nome) {
-      alert("Nome é obrigatório!");
-      return;
-    }
+  if (!nome) {
+    alert("Nome é obrigatório!");
+    return;
+  }
 
-    // Marca reserva no Firebase
-    await setDoc(doc(db, "reservas", String(numeroSelecionado)), {
-      nome: nome
-    });
-
-    const mensagem = `Olá! Gostaria de reservar o número ${numeroSelecionado} para o Chá Rifa do Gustavo. Nome: ${nome}`;
-    const url = `https://wa.me/${seuNumeroWhatsapp}?text=${encodeURIComponent(mensagem)}`;
-    window.open(url, '_blank');
-    location.reload();
+  // Marca reserva no Firebase
+  await setDoc(doc(db, "reservas", String(numeroSelecionado)), {
+    nome: nome
   });
+
+  const mensagem = `Olá! Gostaria de reservar o número ${numeroSelecionado} para o Chá Rifa do Gustavo. Nome: ${nome}`;
+  const url = `https://wa.me/${seuNumeroWhatsapp}?text=${encodeURIComponent(mensagem)}`;
+  
+  // Redireciona para a URL do WhatsApp
+  window.location.href = url; // Esta linha deve funcionar no celular sem ser bloqueada
+
+  // Atualiza a página para refletir a mudança
+  location.reload();
+});
 
   carregarReservas();
 </script>
