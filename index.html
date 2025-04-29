@@ -5,7 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chá Rifa do Gustavo</title>
   <style>
-    /* MESMO CSS QUE JÁ TEMOS */
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 { font-size: 1.5em; }
+    p { font-size: 1.2em; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 50px);
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .number {
+      width: 50px;
+      height: 50px;
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: background-color 0.3s;
+    }
+
+    .number:hover { background-color: #45a049; }
+    .reserved { background-color: #d9534f; cursor: not-allowed; }
+    .selected { background-color: #f0ad4e !important; }
+
+    #enviarBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #enviarBtn:hover { background-color: #45a049; }
+
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: repeat(5, 50px); gap: 5px; }
+      .number { width: 40px; height: 40px; font-size: 0.9em; }
+      #enviarBtn { font-size: 16px; padding: 8px 16px; }
+    }
+
+    @media (max-width: 400px) {
+      .grid { grid-template-columns: repeat(4, 50px); }
+      .number { width: 35px; height: 35px; font-size: 0.8em; }
+      h1 { font-size: 1.2em; }
+      p { font-size: 1em; }
+    }
   </style>
 </head>
 <body>
@@ -17,33 +77,34 @@
 
 <button id="enviarBtn">Enviar para WhatsApp</button>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+<!-- Firebase SDK -->
+<script type="module">
+  // 1. Firebase Config - substitua pelos seus dados
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-<script>
-// CONFIGURAÇÃO FIREBASE
-const firebaseConfig = {
-  apiKey: "AIzaSyAYqXPz6HqhZHv4oaMwsRlQ8R5esIxSdZQ",
-  authDomain: "charifagustavo.firebaseapp.com",
-  databaseURL: "https://charifagustavo-default-rtdb.firebaseio.com",
-  projectId: "charifagustavo",
-  storageBucket: "charifagustavo.firebasestorage.app",
-  messagingSenderId: "436323759753",
-  appId: "1:436323759753:web:1e9a3786637389d0dc7858"
-};
-firebase.initializeApp(firebaseConfig);
+  const firebaseConfig = {
+    apiKey: "AIzaSyAYqXPz6HqhZHv4oaMwsRlQ8R5esIxSdZQ",
+    authDomain: "charifagustavo.firebaseapp.com",
+    projectId: "charifagustavo",
+    storageBucket: "charifagustavo.firebasestorage.app",
+    messagingSenderId: "436323759753",
+    appId: "1:436323759753:web:d4ce44e7ab689ec5dc7858"
+  };
 
-const database = firebase.database();
-const grid = document.getElementById('grid');
-const seuNumeroWhatsapp = '5541984203644';
-let numeroSelecionado = null;
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-// Carregar os números e ouvir alterações
-function carregarNumeros() {
-  database.ref('reservas').on('value', (snapshot) => {
-    const reservas = snapshot.val() || {};
-    grid.innerHTML = '';
+  const seuNumeroWhatsapp = '5541984203644';
+  let numeroSelecionado = null;
+  const grid = document.getElementById('grid');
+
+  async function carregarReservas() {
+    const snapshot = await getDocs(collection(db, "reservas"));
+    const reservas = {};
+    snapshot.forEach(doc => {
+      reservas[doc.id] = doc.data().nome || "Reservado";
+    });
 
     for (let i = 1; i <= 100; i++) {
       const div = document.createElement('div');
@@ -53,7 +114,7 @@ function carregarNumeros() {
       if (reservas[i]) {
         div.classList.add('reserved');
         div.innerText = i + "\n🚫";
-        div.title = "Reservado";
+        div.title = "Reservado por " + reservas[i];
       } else {
         div.addEventListener('click', function() {
           const anterior = document.querySelector('.selected');
@@ -65,33 +126,26 @@ function carregarNumeros() {
 
       grid.appendChild(div);
     }
-  });
-}
-
-carregarNumeros();
-
-// Botão enviar para WhatsApp e reservar no Firebase
-document.getElementById('enviarBtn').addEventListener('click', function() {
-  if (!numeroSelecionado) {
-    alert('Por favor, selecione um número primeiro!');
-    return;
   }
 
-  const confirmacao = confirm(`Deseja mesmo reservar o número ${numeroSelecionado}?`);
-  if (!confirmacao) return;
+  document.getElementById('enviarBtn').addEventListener('click', async function() {
+    if (!numeroSelecionado) {
+      alert('Por favor, selecione um número primeiro!');
+      return;
+    }
 
-  // Grava no Firebase
-  database.ref('reservas/' + numeroSelecionado).set(true)
-    .then(() => {
-      const mensagem = `Olá! Gostaria de reservar o número ${numeroSelecionado} para o Chá Rifa do Gustavo.`;
-      const url = `https://wa.me/${seuNumeroWhatsapp}?text=${encodeURIComponent(mensagem)}`;
-      window.open(url, '_blank');
-    })
-    .catch((error) => {
-      alert('Erro ao reservar o número. Tente novamente.');
-      console.error(error);
+    // Marca reserva no Firebase
+    await setDoc(doc(db, "reservas", String(numeroSelecionado)), {
+      nome: "Reservado"
     });
-});
+
+    const mensagem = `Olá! Gostaria de reservar o número ${numeroSelecionado} para o Chá Rifa do Gustavo.`;
+    const url = `https://wa.me/${seuNumeroWhatsapp}?text=${encodeURIComponent(mensagem)}`;
+    window.open(url, '_blank');
+    location.reload();
+  });
+
+  carregarReservas();
 </script>
 
 </body>
