@@ -149,9 +149,15 @@
 
   const mensagem = `Olá! Gostaria de reservar o número ${numeroSelecionado} para o Chá Rifa do Gustavo. Nome: ${nome}`;
   const url = `https://wa.me/${seuNumeroWhatsapp}?text=${encodeURIComponent(mensagem)}`;
+
+  // Tenta abrir o WhatsApp em uma nova aba (para computador)
+  const popUp = window.open(url, '_blank');
   
-  // Redireciona para a URL do WhatsApp
-  window.location.href = url; // Esta linha deve funcionar no celular sem ser bloqueada
+  // Verifica se a janela pop-up foi bloqueada (em alguns navegadores, especialmente no computador)
+  if (!popUp || popUp.closed || typeof popUp.closed == 'undefined') {
+    // Caso o pop-up tenha sido bloqueado, redireciona diretamente (para o celular ou outros casos)
+    window.location.href = url;
+  }
 
   // Atualiza a página para refletir a mudança
   location.reload();
