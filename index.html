@@ -134,12 +134,20 @@
       return;
     }
 
+    // Pedir o nome do usuário antes de enviar a reserva
+    const nome = prompt("Por favor, digite seu nome:");
+
+    if (!nome) {
+      alert("Nome é obrigatório!");
+      return;
+    }
+
     // Marca reserva no Firebase
     await setDoc(doc(db, "reservas", String(numeroSelecionado)), {
-      nome: "Reservado"
+      nome: nome
     });
 
-    const mensagem = `Olá! Gostaria de reservar o número ${numeroSelecionado} para o Chá Rifa do Gustavo.`;
+    const mensagem = `Olá! Gostaria de reservar o número ${numeroSelecionado} para o Chá Rifa do Gustavo. Nome: ${nome}`;
     const url = `https://wa.me/${seuNumeroWhatsapp}?text=${encodeURIComponent(mensagem)}`;
     window.open(url, '_blank');
     location.reload();
